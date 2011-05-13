@@ -57,7 +57,7 @@ static int hex_from_str(std::string const& str)
     return result;
 }
 
-static std::string::const_iterator proc_name(std::string::const_iterator iter)
+static std::string::const_iterator module_name(std::string::const_iterator iter)
 {
     while ('(' != *iter++)
         ;
@@ -88,7 +88,7 @@ static std::string::const_iterator func_addr(std::string::const_iterator iter)
 std::string frame::str() const
 {
     std::stringstream ss;
-    ss << std::hex << proc << ' ' << address << ' ' << func << ' ' << offset;
+    ss << std::hex << module << ' ' << address << ' ' << func << ' ' << offset;
     return ss.str();
 }
 
@@ -97,8 +97,8 @@ frame trac::demangle(std::string const& frame_info)
     std::string::const_iterator end = frame_info.begin();
     std::string::const_iterator begin = end;
 
-    end = proc_name(end) - 1;
-    std::string proc(begin, end);
+    end = module_name(end) - 1;
+    std::string module(begin, end);
     ++end;
     begin = end;
 
@@ -119,5 +119,5 @@ frame trac::demangle(std::string const& frame_info)
     end = func_addr(end) - 1;
     int address = hex_from_str(std::string(begin + 2, end));
 
-    return frame(proc, offset, func, address);
+    return frame(module, address, func, offset);
 }

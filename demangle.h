@@ -6,13 +6,13 @@
 namespace trac {
 
     struct frame {
-        std::string const proc;
+        std::string const module;
         int const address;
         std::string const func;
         int const offset;
 
-        frame(std::string const& p, int a, std::string const& f, int o)
-            : proc(p)
+        frame(std::string const& m, int a, std::string const& f, int o)
+            : module(m)
             , address(a)
             , func(f)
             , offset(o)

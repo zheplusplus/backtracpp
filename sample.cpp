@@ -15,22 +15,22 @@ static void print(std::vector<trac::frame> const& frames)
     std::for_each(frames.begin(), frames.end(), printer());
 }
 
-void test_0()
+void test(int)
 {
     print(trac::stacktrace());
     std::cout << std::endl;
 }
 
-void test_1()
+void test()
 {
-    test_0();
+    test(0);
     print(trac::stacktrace());
     std::cout << std::endl;
 }
 
-int main()
+int main(int, char**)
 {
-    test_1();
+    test();
     print(trac::stacktrace());
     return 0;
 
