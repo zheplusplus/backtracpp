@@ -1,11 +1,17 @@
+ifndef REL_PATH
+	REL_PATH=.
+endif
+
 ifndef LIB_DIR
-	LIB_DIR="."
+	LIB_DIR=$(REL_PATH)
+else
+	LIB_DIR=$(REL_PATH)/$(LIB_DIR)
 endif
 
 CC=g++ -c
 RESOLVE_DEP=g++ -MM
 AR=ar rcs
-WORKDIR=.
+WORKDIR=$(REL_PATH)
 
 CFLAGS=-Wall -Wextra -Wold-style-cast -Werror
 MKTMP=tmp.mk

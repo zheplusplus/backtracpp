@@ -47,7 +47,7 @@ static void install(int sig, signal_action const& action)
 
 static void handle_segv(int, siginfo_t*, void*)
 {
-    (**ostream()) << "Segment Fault:" << std::endl;
+    (**ostream()) << "Segmentation fault:" << std::endl;
     print_trace(**ostream());
     std::terminate();
 }
@@ -61,7 +61,7 @@ static void handle_div_0(int, siginfo_t* info, void*)
 {
     if (FPE_INTDIV == info->si_code)
     {
-        (**ostream()) << "Divide by 0:" << std::endl;
+        (**ostream()) << "Divided by 0:" << std::endl;
         print_trace(**ostream());
         std::terminate();
     }
