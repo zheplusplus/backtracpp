@@ -10,13 +10,15 @@ How to...
 ---------
 
 ### To build
-`make` and `libbacktrapp.a` will be generated.
+`make` and `libbacktracpp.a` will be generated.
+
+Use `make LIB_DIR=library-output-directory` to specify where to put `libbacktracpp.a`, or current directory if not specified.
 
 ### See samples
 `make sample` and run `backtrace.out`
 
 ### Run test
-Have `gtest` installed and `make check`
+Have `gtest` installed and `make runtest`
 
 License
 -------
