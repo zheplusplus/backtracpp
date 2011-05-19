@@ -17,21 +17,47 @@ static void print(std::vector<trac::frame> const& frames)
 
 void test(int)
 {
-    print(trac::stacktrace());
+    trac::print_trace(std::cout);
     std::cout << std::endl;
 }
 
 void test()
 {
     test(0);
-    print(trac::stacktrace());
-    std::cout << std::endl;
+    trac::print_trace_br();
 }
+
+struct base {
+    virtual void echo() const
+    {
+        trac::print_trace_br();
+    }
+
+    virtual ~base() {}
+};
+
+struct inherit
+    : public base
+{
+    void echo() const
+    {
+        trac::print_trace_br();
+    }
+};
 
 int main(int, char**)
 {
     test();
     print(trac::stacktrace());
+
+    base b;
+    inherit i;
+
+    base* p = &b;
+    p->echo();
+    p = &i;
+    p->echo();
+
     return 0;
 
 }

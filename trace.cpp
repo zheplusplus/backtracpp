@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <list>
 #include <stdexcept>
+#include <algorithm>
+#include <iostream>
 
 #include "trace.h"
 
@@ -29,6 +31,19 @@ namespace {
         char** const _strings;
     };
 
+    struct printer {
+        explicit printer(std::ostream& s)
+            : os(s)
+        {}
+
+        void operator()(trac::frame const& frame) const
+        {
+            os << frame.str() << std::endl;
+        }
+
+        std::ostream& os;
+    };
+
 }
 
 static std::list<frame> package(char const* const* strings, int size)
@@ -50,4 +65,30 @@ std::vector<frame> trac::stacktrace()
     }
     std::list<frame> frames(package(strings.get(), nptrs));
     return std::vector<frame>(frames.begin(), frames.end());
+}
+
+static void print(std::vector<trac::frame> const& frames, std::ostream& os)
+{
+    std::for_each(frames.begin(), frames.end(), printer(os));
+}
+
+void trac::print_trace()
+{
+    print_trace(std::cout);
+}
+
+std::ostream& trac::print_trace(std::ostream& os)
+{
+    print(stacktrace(), os);
+    return os;
+}
+
+void trac::print_trace_br()
+{
+    print_trace_br(std::cout);
+}
+
+std::ostream& trac::print_trace_br(std::ostream& os)
+{
+    return print_trace(os) << std::endl;
 }

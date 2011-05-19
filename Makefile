@@ -1,8 +1,11 @@
+ifndef LIB_DIR
+	LIB_DIR="."
+endif
+
 CC=g++ -c
 RESOLVE_DEP=g++ -MM
 AR=ar rcs
 WORKDIR=.
-OUTPUT_DIR=.
 
 CFLAGS=-Wall -Wextra -Wold-style-cast -Werror
 MKTMP=tmp.mk
@@ -16,24 +19,24 @@ all:backtracpplib
 	make -f $(MKTMP)
 
 backtracpplib:trace.d demangle.d
-	$(AR) $(OUTPUT_DIR)/libbacktracpp.a $(WORKDIR)/trace.o $(WORKDIR)/demangle.o
+	$(AR) $(LIB_DIR)/libbacktracpp.a $(WORKDIR)/trace.o $(WORKDIR)/demangle.o
 
 LINK=g++ -rdynamic
 TEST_LIB=-lgtest -lgtest_main -lpthread
 
-check:test/test-demangle.d all
+runtest:test/test-demangle.d all
 	$(LINK) $(WORKDIR)/test/test-demangle.o \
-	        -L$(OUTPUT_DIR) -lbacktracpp $(TEST_LIB) \
-	     -o $(OUTPUT_DIR)/test-backtracpp.out
-	$(OUTPUT_DIR)/test-backtracpp.out
+	        -L$(LIB_DIR) -lbacktracpp $(TEST_LIB) \
+	     -o $(WORKDIR)/test-backtracpp.out
+	$(WORKDIR)/test-backtracpp.out
 
 sample:sample.d all
-	$(LINK) $(WORKDIR)/sample.o -L$(OUTPUT_DIR) -lbacktracpp \
-	     -o $(OUTPUT_DIR)/backtrace.out
+	$(LINK) $(WORKDIR)/sample.o -L$(LIB_DIR) -lbacktracpp \
+	     -o $(WORKDIR)/backtrace.out
 
 clean:
 	rm -f $(MKTMP)
 	rm -f $(WORKDIR)/*.o
 	rm -f $(WORKDIR)/test/*.o
-	rm -f $(OUTPUT_DIR)/libbacktracpp.a
-	rm -f $(OUTPUT_DIR)/*.out
+	rm -f $(LIB_DIR)/libbacktracpp.a
+	rm -f $(WORKDIR)/*.out
