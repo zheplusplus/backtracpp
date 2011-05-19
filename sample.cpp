@@ -1,7 +1,10 @@
+#include <cstring>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 #include "trace.h"
+#include "sig-handler.h"
 
 struct printer {
     void operator()(trac::frame const& frame) const
@@ -45,8 +48,29 @@ struct inherit
     }
 };
 
+int test_divide_by_0()
+{
+    int x;
+    int y = 10;
+    memset(&x, 0, sizeof(x));
+    return y / x;
+}
+
+void access_nul()
+{
+    char* x;
+    memset(&x, 0, sizeof(char*));
+    std::cout << std::endl;
+    std::cout << *x << std::endl;
+    std::cout << std::endl;
+}
+
 int main(int, char**)
 {
+    std::set_terminate(access_nul);
+    trac::trace_on_div_0();
+    trac::trace_on_seg_fault();
+
     test();
     print(trac::stacktrace());
 
@@ -58,6 +82,5 @@ int main(int, char**)
     p = &i;
     p->echo();
 
-    return 0;
-
+    return test_divide_by_0();
 }

@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include "demangle.h"
 
@@ -27,6 +28,19 @@ namespace {
         char* const _string;
     };
 
+    struct ch_finder {
+        explicit ch_finder(char ch)
+            : c(ch)
+        {}
+
+        bool operator()(char ch) const
+        {
+            return c == ch;
+        }
+
+        char const c;
+    };
+
 }
 
 static std::string demangle_func_name(std::string const& name)
@@ -43,6 +57,46 @@ static std::string demangle_func_name(std::string const& name)
     }
 }
 
+static std::string find_module(std::string const& str)
+{
+    std::string::const_reverse_iterator e = std::find_if(str.rbegin(), str.rend(), ch_finder('('));
+    if (e == str.rend()) {
+        return "";
+    }
+    std::string reversed(e + 1, str.rend());
+    return std::string(reversed.rbegin(), reversed.rend());
+}
+
+static std::string find_func_name(std::string const& str)
+{
+    std::string::const_reverse_iterator e = std::find_if(str.rbegin(), str.rend(), ch_finder('+'));
+    if (e == str.rend()) {
+        return "";
+    }
+    std::string::const_reverse_iterator b = std::find_if(e, str.rend(), ch_finder('('));
+    std::string reversed(e + 1, b);
+    return std::string(reversed.rbegin(), reversed.rend());
+}
+
+static std::string find_func_offset(std::string const& str)
+{
+    std::string::const_reverse_iterator e = std::find_if(str.rbegin(), str.rend(), ch_finder(')'));
+    std::string::const_reverse_iterator b = std::find_if(e, str.rend(), ch_finder('+'));
+    if (b == str.rend()) {
+        return "";
+    }
+    std::string reversed(e + 1, b);
+    return std::string(reversed.rbegin() + 2, reversed.rend());
+}
+
+static std::string find_address(std::string const& str)
+{
+    std::string::const_reverse_iterator e = std::find_if(str.rbegin(), str.rend(), ch_finder(']'));
+    std::string::const_reverse_iterator b = std::find_if(e, str.rend(), ch_finder('['));
+    std::string reversed(e + 1, b);
+    return std::string(reversed.rbegin() + 2, reversed.rend());
+}
+
 static int hex_from_str(std::string const& str)
 {
     int result = 0;
@@ -57,34 +111,6 @@ static int hex_from_str(std::string const& str)
     return result;
 }
 
-static std::string::const_iterator module_name(std::string::const_iterator iter)
-{
-    while ('(' != *iter++)
-        ;
-    return iter;
-}
-
-static std::string::const_iterator func_name(std::string::const_iterator iter)
-{
-    for (; '+' != *iter && ')' != *iter; ++iter)
-        ;
-    return iter;
-}
-
-static std::string::const_iterator func_offset(std::string::const_iterator iter)
-{
-    while (')' != *iter++)
-        ;
-    return iter;
-}
-
-static std::string::const_iterator func_addr(std::string::const_iterator iter)
-{
-    while (']' != *iter++)
-        ;
-    return iter;
-}
-
 std::string frame::str() const
 {
     std::stringstream ss;
@@ -94,30 +120,9 @@ std::string frame::str() const
 
 frame trac::demangle(std::string const& frame_info)
 {
-    std::string::const_iterator end = frame_info.begin();
-    std::string::const_iterator begin = end;
-
-    end = module_name(end) - 1;
-    std::string module(begin, end);
-    ++end;
-    begin = end;
-
-    end = func_name(end);
-    std::string func(demangle_func_name(std::string(begin, end)));
-    ++end;
-    begin = end;
-
-    int offset = 0;
-    if (' ' != *end) {
-        end = func_offset(end) - 1;
-        offset = hex_from_str(std::string(begin + 2, end));
-        while ('[' != *end++)
-            ;
-        begin = end;
-    }
-
-    end = func_addr(end) - 1;
-    int address = hex_from_str(std::string(begin + 2, end));
-
+    std::string module(find_module(frame_info));
+    int address(hex_from_str(find_address(frame_info)));
+    std::string func(demangle_func_name(find_func_name(frame_info)));
+    int offset(hex_from_str(find_func_offset(frame_info)));
     return frame(module, address, func, offset);
 }

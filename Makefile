@@ -18,8 +18,11 @@ all:backtracpplib
 	echo "	$(CC) $< $(CFLAGS) -o $(WORKDIR)/$*.o" >> $(MKTMP)
 	make -f $(MKTMP)
 
-backtracpplib:trace.d demangle.d
-	$(AR) $(LIB_DIR)/libbacktracpp.a $(WORKDIR)/trace.o $(WORKDIR)/demangle.o
+backtracpplib:trace.d demangle.d sig-handler.d
+	$(AR) $(LIB_DIR)/libbacktracpp.a \
+	      $(WORKDIR)/trace.o \
+	      $(WORKDIR)/demangle.o \
+	      $(WORKDIR)/sig-handler.o
 
 LINK=g++ -rdynamic
 TEST_LIB=-lgtest -lgtest_main -lpthread

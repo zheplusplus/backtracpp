@@ -28,3 +28,12 @@ TEST(Demangle, FrameNameMissing)
     EXPECT_EQ("", frame.func);
     EXPECT_EQ(0, frame.offset);
 }
+
+TEST(Demangle, AddressOnly)
+{
+    trac::frame frame(trac::demangle("[0xb0000000]"));
+    EXPECT_EQ("", frame.module);
+    EXPECT_EQ(0xb0000000, frame.address);
+    EXPECT_EQ("", frame.func);
+    EXPECT_EQ(0, frame.offset);
+}
